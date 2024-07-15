@@ -38,18 +38,20 @@ if os.path.exists(JSON_FILE):
     with open(JSON_FILE, 'r') as f:
         vm_info = json.load(f)
 
-    # prep data for sheets
     data = [['Name', 'MachineType', 'DiskSizeGB', 'Description', 'Tags', 'Status', 'NetworkIP']]
-    for instance in vm_info:
-        data.append([
-            instance.get('name', ''),
-            instance.get('machineType', ''),
-            int(instance.get('diskSizeGb', 0)),  # Convert to integer
-            instance.get('description', ''),
-            '; '.join(instance.get('tags', [])) if instance.get('tags') else '',  # Handle null tags
-            instance.get('status', ''),
-            instance.get('networkIP', '')
-        ])
+
+    # flatten the list of lists
+    for instances in vm_info:  # Assuming vm_info is a list of lists
+        for instance in instances:  # Now iterate through each instance
+            data.append([
+                instance.get('name', ''),
+                instance.get('machineType', '').split('/')[-1],
+                instance.get('diskSizeGb', ''),
+                instance.get('description', ''),
+                '; '.join(instance.get('tags', [])) if instance.get('tags') else '',
+                instance.get('status', ''),
+                instance.get('networkIP', '')
+            ])
 
     spreadsheet = gc.open_by_key(SPREADSHEET_ID)
     sheet = spreadsheet.sheet1

@@ -24,7 +24,7 @@ fetch_instance_data() {
 update_gcp_info_sheet() {
     local INSTANCE_DATA=$1
     # make the gcp_vm_info.json file
-    echo $INSTANCE_DATA >> ./reports/gcp/gcp_vm_info_$CURRENT_DATE.json
+    echo $INSTANCE_DATA > ./reports/gcp/gcp_vm_info_$CURRENT_DATE.json
 }
 
 main() {
