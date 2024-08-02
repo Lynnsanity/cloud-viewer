@@ -32,11 +32,16 @@ refer [here](./rbac/gcp/README.md)
 `make gcp-report` this should prompt you to login while script runs.
 these reports go to ./reports/gcp/
 
+`make azr-report` this should prompt you to login while script runs.
+these reports go to ./reports/azr/
 
 ## Update Google Spreadsheet
 
 To update the google sheet specific to GCP information:
 `make update-gcp-sheet`
+
+To update the google sheet specific to AZR information:
+`make update-azr-sheet`
 
 Cool sidenote: When you update the sheet, you'll be prompted to enter date of when report was generated.
 So, you don't HAVE to always replace the sheet with new information. You can go back and display old vm
