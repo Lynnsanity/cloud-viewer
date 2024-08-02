@@ -13,6 +13,7 @@ root-project:
 report-directories:
 	mkdir -p ./reports
 	mkdir -p ./reports/gcp
+	mkdir -p ./reports/azr
 
 .PHONY: requirements
 requirements:
@@ -28,7 +29,15 @@ env:
 gcp-report:
 	./gcp-info.sh
 
+.PHONY: azr-report
+azr-report:
+	./azr-info.sh
+
 .PHONY: update-gcp-sheet
 update-gcp-sheet:
 	python3 update_gcp_sheet.py
+
+.PHONY: update-azr-sheet
+update-azr-sheet:
+	python3 update_azr_sheet.py
 

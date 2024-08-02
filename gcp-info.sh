@@ -14,10 +14,28 @@ set_project() {
 
 # use gcloud command to fetch instance data of vms
 fetch_instance_data() {
+    local PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+    local PROJECT_NAME=$(gcloud projects describe "$PROJECT_ID" --format='value(name)' 2>/dev/null)
     local INSTANCES=$(gcloud compute instances list --format=json 2>/dev/null)
 
+    # check if the instances variable is not empty
     if [ -n "$INSTANCES" ] && [ "$INSTANCES" != "[]" ]; then
-        echo "$INSTANCES" | jq -r '.[] | { name: .name, machineType: .machineType, diskSizeGb: .disks[].diskSizeGb, status: .status, networkIP: .networkInterfaces[].networkIP, description: .description, tags: .tags.items }'
+        # jq to parse the instances JSON
+        echo "$INSTANCES" | jq -r --arg project "$PROJECT_NAME" '
+            .[] | {
+                name: .name,
+                project: $project,
+                machineType: .machineType,
+                provisioningModel: .scheduling.provisioningModel,
+                diskSizeGb: ([
+                    .disks[].diskSizeGb
+                ] | join(", ")),  # Join all disk sizes into a single string
+                status: .status,
+                networkIP: .networkInterfaces[].networkIP,
+                description: .description,
+                tags: .tags.items
+            }
+        '
     fi
 }
 

@@ -12,7 +12,7 @@ SERVICE_ACCOUNT_FILE = './rbac/gcp/service-account.json'
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-SPREADSHEET_ID = '<YOUR_GOOGLE_SHEET_ID_HERE>'
+SPREADSHEET_ID = '<SHEET_ID_HERE>'
 
 # authenticate service account to spreadsheet scope
 credentials = service_account.Credentials.from_service_account_file(
@@ -38,20 +38,28 @@ if os.path.exists(JSON_FILE):
     with open(JSON_FILE, 'r') as f:
         vm_info = json.load(f)
 
-    data = [['Name', 'MachineType', 'DiskSizeGB', 'Description', 'Tags', 'Status', 'NetworkIP']]
+    data = [['Name', 'ProjectName', 'MachineType', 'ProvisioningModel', 'DiskSizeGB', 'Description', 'Tags', 'Status', 'NetworkIP']]
 
-    # flatten the list of lists
-    for instances in vm_info:  # Assuming vm_info is a list of lists
-        for instance in instances:  # Now iterate through each instance
+    for instance in vm_info:
+        if isinstance(instance, dict):
+            if 'disks' in instance:
+                disk_sizes_gb = ', '.join(str(disk.get('diskSizeGb', '')) for disk in instance['disks'])
+            else:
+                disk_sizes_gb = str(instance.get('diskSizeGb', ''))
+
             data.append([
                 instance.get('name', ''),
+                instance.get('project', ''),
                 instance.get('machineType', '').split('/')[-1],
-                instance.get('diskSizeGb', ''),
+                instance.get('provisioningModel', '').lower(),
+                disk_sizes_gb,
                 instance.get('description', ''),
-                '; '.join(instance.get('tags', [])) if instance.get('tags') else '',
+                '; '.join(instance.get('tags', [])) if instance.get('tags') else '',  # Handle null tags
                 instance.get('status', ''),
                 instance.get('networkIP', '')
             ])
+        else:
+            print("Skipping non-dictionary instance: ", instance)
 
     spreadsheet = gc.open_by_key(SPREADSHEET_ID)
     sheet = spreadsheet.sheet1
@@ -75,8 +83,8 @@ if os.path.exists(JSON_FILE):
                         "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": len(data) + 1,
-                        "startColumnIndex": 5,
-                        "endColumnIndex": 6
+                        "startColumnIndex": 7,
+                        "endColumnIndex": 8
                     }],
                     "booleanRule": {
                         "condition": {
@@ -98,8 +106,8 @@ if os.path.exists(JSON_FILE):
                         "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": len(data) + 1,
-                        "startColumnIndex": 5,
-                        "endColumnIndex": 6
+                        "startColumnIndex": 7,
+                        "endColumnIndex": 8
                     }],
                     "booleanRule": {
                         "condition": {
